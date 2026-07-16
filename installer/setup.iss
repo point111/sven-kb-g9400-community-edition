@@ -2,7 +2,6 @@
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "point111 community project"
 #define MyAppURL "https://github.com/point111/sven-kb-g9400-community-edition"
-#define MyAppExeName "SVEN-KB-G9400-Community-Patch-1.0.0-Setup.exe"
 
 [Setup]
 AppId={{1C4B66A7-7C47-49C6-AF88-9400CE100001}
@@ -47,12 +46,6 @@ Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesnte
 Name: "{autoprograms}\SVEN KB-G9400 Community Patch\Verify installation"; Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\build\test.ps1"""; WorkingDir: "{app}"; IconFilename: "powershell.exe"
 Name: "{autoprograms}\SVEN KB-G9400 Community Patch\Restore original software"; Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\build\restore.ps1"""; WorkingDir: "{app}"; IconFilename: "powershell.exe"
 
-[Run]
-Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\build\install.ps1"""; WorkingDir: "{app}"; StatusMsg: "Applying and verifying the Windows 11 compatibility patch..."; Flags: runhidden waituntilterminated; Check: VendorConfiguratorExists
-
-[UninstallRun]
-Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\build\restore.ps1"""; WorkingDir: "{app}"; RunOnceId: "RestoreOriginal"; Flags: runhidden waituntilterminated
-
 [Code]
 const
   VendorExe = 'C:\Program Files (x86)\KB-G9400 Gaming Keyboard\KB-G9400 Gaming Keyboard.exe';
@@ -60,6 +53,18 @@ const
 function VendorConfiguratorExists: Boolean;
 begin
   Result := FileExists(VendorExe);
+end;
+
+function RunPowerShellScript(const ScriptPath: String; var ResultCode: Integer): Boolean;
+begin
+  Result := Exec(
+    'powershell.exe',
+    '-NoProfile -ExecutionPolicy Bypass -File "' + ScriptPath + '"',
+    ExpandConstant('{app}'),
+    SW_HIDE,
+    ewWaitUntilTerminated,
+    ResultCode
+  );
 end;
 
 function InitializeSetup(): Boolean;
@@ -81,22 +86,31 @@ var
 begin
   if CurStep = ssPostInstall then
   begin
-    if not Exec(
-      'powershell.exe',
-      '-NoProfile -ExecutionPolicy Bypass -File "' + ExpandConstant('{app}\build\test.ps1') + '"',
-      ExpandConstant('{app}'),
-      SW_HIDE,
-      ewWaitUntilTerminated,
-      ResultCode
-    ) or (ResultCode <> 0) then
+    WizardForm.StatusLabel.Caption := 'Applying the Windows 11 compatibility patch...';
+    if not RunPowerShellScript(ExpandConstant('{app}\build\install.ps1'), ResultCode) or
+       (ResultCode <> 0) then
     begin
       MsgBox(
-        'The installer could not verify the patched state.' + #13#10 +
-        'The original backup was retained. Review the patch log before using the configurator.',
+        'The compatibility patch could not be installed.' + #13#10 +
+        'No unknown EXE version was modified. Review the setup and patch logs for details.',
         mbError,
         MB_OK
       );
-      WizardForm.Close;
+      RaiseException('Patch installation failed.');
+    end;
+
+    WizardForm.StatusLabel.Caption := 'Verifying the installed patch...';
+    if not RunPowerShellScript(ExpandConstant('{app}\build\test.ps1'), ResultCode) or
+       (ResultCode <> 0) then
+    begin
+      RunPowerShellScript(ExpandConstant('{app}\build\restore.ps1'), ResultCode);
+      MsgBox(
+        'Verification failed. The installer attempted to restore the original configurator.' + #13#10 +
+        'Review the setup and patch logs before trying again.',
+        mbError,
+        MB_OK
+      );
+      RaiseException('Patch verification failed.');
     end;
   end;
 end;
@@ -107,18 +121,12 @@ var
 begin
   if CurUninstallStep = usUninstall then
   begin
-    if not Exec(
-      'powershell.exe',
-      '-NoProfile -ExecutionPolicy Bypass -File "' + ExpandConstant('{app}\build\restore.ps1') + '"',
-      ExpandConstant('{app}'),
-      SW_HIDE,
-      ewWaitUntilTerminated,
-      ResultCode
-    ) or (ResultCode <> 0) then
+    if not RunPowerShellScript(ExpandConstant('{app}\build\restore.ps1'), ResultCode) or
+       (ResultCode <> 0) then
     begin
       MsgBox(
         'The original configurator could not be restored automatically.' + #13#10 +
-        'Uninstallation has been stopped to avoid removing the recovery tools.',
+        'Uninstallation has been stopped so the recovery tools remain available.',
         mbError,
         MB_OK
       );
