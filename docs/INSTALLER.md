@@ -11,6 +11,20 @@ The release installer is built with Inno Setup 6 and does not contain any origin
 
 The installer copies only the Community Patch scripts, applies the compatibility patch, and verifies the installed state. An unknown vendor EXE is rejected without modification.
 
+The Community Patch support files are stored separately under:
+
+```text
+C:\ProgramData\SVEN KB-G9400 Community Patch
+```
+
+The directory-selection page is intentionally hidden. The installer does not replace the official application directory with this path. It still patches only the verified official configurator located at:
+
+```text
+C:\Program Files (x86)\KB-G9400 Gaming Keyboard\KB-G9400 Gaming Keyboard.exe
+```
+
+Keeping the patch tools separate prevents the uninstaller from accidentally deleting vendor-owned files.
+
 To remove the patch, open **Installed apps** in Windows and uninstall **SVEN KB-G9400 Community Patch**. The uninstaller restores and verifies the original EXE before deleting the Community Patch tools.
 
 ## Build requirements
