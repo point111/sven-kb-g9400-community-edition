@@ -1,55 +1,52 @@
 # Roadmap
 
-## v1.0.0-alpha1
+## Version 1.x — Windows 11 compatibility
 
-- совместимость с Windows 11;
-- безопасное применение патча;
-- резервная копия и восстановление оригинального EXE;
-- русская текстовая локализация;
-- базовая документация.
+Version 1.x is limited to compatibility and maintenance of the official SVEN KB-G9400 configurator.
 
-## v1.0.0-alpha2
+### v1.0.0
 
-- русификация растровых элементов `skins`;
-- переключение RU/EN с перезапуском программы;
-- окно About с информацией о Community Edition;
-- улучшенная диагностика установки.
+- Windows 11 compatibility patch;
+- safe installation and repeated installation;
+- verified backup and restoration of the original EXE;
+- diagnostic log and automated integrity test;
+- English public README and Russian supplementary documentation;
+- verified on Windows 11 25H2 and `VID_30FA&PID_2350`.
 
-## v1.0.0-beta1
+### Possible 1.x maintenance
 
-- единый установщик;
-- деинсталлятор и полный откат;
-- проверка на чистой Windows 11;
-- подготовка GitHub Release.
+- compatibility fixes for confirmed vendor-software revisions;
+- clearer diagnostics and documentation;
+- support for additional hardware revisions only after real-device verification.
 
-## v1.0.0
+Version 1.x will not add features absent from the vendor software.
 
-- стабильная версия после подтверждения основных функций;
-- финальные инструкции;
-- известные ограничения и список проверенных аппаратных ревизий.
+## Version 2.x — Community extensions
 
-## Экспериментальные функции
+Version 2.x is reserved for capabilities beyond the original configurator.
 
-### Подсветка по языку ввода
+### Localization architecture research
 
-Исследовать возможность автоматического переключения цвета или профиля подсветки при смене активной раскладки Windows, например:
+The original EXE has no language plug-in interface. Localization therefore requires a controlled, version-aware mechanism:
 
-- английская раскладка — один цвет;
-- русская раскладка — другой цвет;
-- пользовательская настройка цветов и отключение функции.
+- reproducible resource patching of a verified original EXE; or
+- a separate loader/component that checks the environment and activates only compatible resources or extensions.
 
-Этапы исследования:
+The repository must not distribute original or pre-modified SVEN binaries.
 
-1. надёжно определять текущий язык ввода активного окна;
-2. отслеживать смену раскладки без постоянного опроса и заметной нагрузки;
-3. воспроизвести безопасную HID-команду смены цвета или профиля;
-4. проверить, не конфликтует ли фоновая служба с оригинальным конфигуратором;
-5. реализовывать функцию только при подтверждённой безопасности на реальном устройстве.
+### Candidate features
 
-Статус: идея выглядит технически возможной, но требует отдельного фонового приложения и исследования HID-протокола. Не входит в обязательный состав v1.0.0.
+- Russian and additional interface languages;
+- language selection and safe resource rollback;
+- lighting profile changes based on the active Windows input language;
+- profile backup, import, and export;
+- diagnostic HID logging;
+- optional independent utilities or services.
 
-## Возможные улучшения
+### Safety requirements
 
-- резервное копирование профилей;
-- диагностический HID-журнал;
-- поддержка других ревизий только после проверки на реальном оборудовании.
+- identify the exact installed software version before applying an extension;
+- apply only extensions compatible with that version and environment;
+- preserve backups and provide complete rollback;
+- keep independent extensions separate where EXE modification is unnecessary;
+- require real-device testing for HID-related changes.

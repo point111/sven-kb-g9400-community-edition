@@ -1,7 +1,18 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$script:AppDir = Join-Path ${env:ProgramFiles(x86)} 'KB-G9400 Gaming Keyboard'
+function Get-ProgramFilesX86Path {
+    $path = ${env:ProgramFiles(x86)}
+    if ([string]::IsNullOrWhiteSpace($path)) {
+        $path = $env:ProgramFiles
+    }
+    if ([string]::IsNullOrWhiteSpace($path)) {
+        throw 'Не удалось определить каталог Program Files (x86).'
+    }
+    return $path
+}
+
+$script:AppDir = Join-Path (Get-ProgramFilesX86Path) 'KB-G9400 Gaming Keyboard'
 $script:ExeName = 'KB-G9400 Gaming Keyboard.exe'
 $script:BackupDir = Join-Path $script:AppDir '.community-patch-backup'
 $script:PatchOffset = 0x669B

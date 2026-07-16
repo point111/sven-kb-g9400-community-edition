@@ -1,45 +1,62 @@
 # Changelog
 
-Все заметные изменения проекта документируются в этом файле.
+All notable project changes are documented in this file.
 
-Формат версий основан на Semantic Versioning с предварительными версиями `alpha` и `beta`.
+The project follows Semantic Versioning.
 
 ## [Unreleased]
 
 ### Added
 
-- начальная структура SVEN KB-G9400 Community Edition;
-- PowerShell-патчер совместимости;
-- резервное копирование и восстановление оригинального EXE;
-- документация по причине ошибки `Product and driver are inconsistent`;
-- ветка разработки `develop`;
-- упрощённый рабочий процесс для solo-maintainer проекта;
-- проверенный каталог русской текстовой локализации `localization/ru-RU.csv`;
-- русское руководство по установке, восстановлению и диагностике;
-- журнал действий патчера и `state.json` с SHA-256;
-- удобные точки входа `build/install.ps1`, `build/restore.ps1` и `build/test.ps1`.
+- unsigned Inno Setup graphical installer for users who do not use PowerShell;
+- Windows Installed apps uninstaller that restores the original EXE before removing patch tools;
+- reproducible installer build script and SHA-256 output;
+- graphical installer build and test documentation.
+
+### Planned
+
+- version 2.x extensions beyond the capabilities of the vendor software;
+- reproducible localization resource workflow;
+- support for additional hardware revisions after real-device verification.
+
+## [1.0.0] - 2026-07-16
+
+### Added
+
+- Windows 11 compatibility patch for the official SVEN KB-G9400 configurator;
+- automatic backup and complete restoration of the original EXE;
+- SHA-256 verification of backup, patched, and restored states;
+- atomic patched-EXE replacement through a temporary file;
+- diagnostic log and `state.json`;
+- convenient entry points: `build/install.ps1`, `build/restore.ps1`, and `build/test.ps1`;
+- technical, testing, workflow, and user documentation;
+- verified Russian terminology catalogue for future localization research.
 
 ### Changed
 
-- запись исправленного EXE выполняется через временный файл;
-- резервная копия проверяется по SHA-256;
-- после применения патча проверяется записанный байт;
-- восстановленный EXE проверяется по SHA-256;
-- повторный запуск установщика не изменяет уже исправленный файл;
-- `build/test.ps1` различает фактический SHA-256 текущего EXE и сохранённый SHA-256 исправленного файла, а также сверяет текущий файл с ожидаемым состоянием.
+- the patcher refuses unknown EXE versions instead of applying an unchecked offset;
+- repeated installation leaves an already patched EXE unchanged;
+- the verification script distinguishes the actual installed EXE hash from hashes stored in `state.json`.
 
 ### Verified
 
-- запуск конфигуратора на Windows 11 25H2;
-- аппаратная пара `VID_30FA / PID_2350`;
-- применение усиленного патчера через `build/install.ps1`;
-- повторная установка без повторного изменения EXE;
-- изменение цветов подсветки;
-- переназначение клавиш;
-- сохранение настроек в INI-профиле;
-- восстановление оригинального EXE и проверка отката;
-- автоматическая проверка через `build/test.ps1` в исправленном и восстановленном состояниях возвращает `RESULT: PASS`.
+- Windows 11 25H2;
+- hardware ID `VID_30FA / PID_2350`;
+- configurator launch without `Product and driver are inconsistent`;
+- lighting color changes;
+- key reassignment;
+- INI profile saving;
+- repeated installation;
+- restoration of the original EXE;
+- automated checks in patched and restored states with `RESULT: PASS`.
 
-### Not yet verified
+### Scope
 
-- RU-payload для ресурсов конфигуратора ещё не собран и не публикуется.
+Version 1.0.0 is only a Windows 11 compatibility patch. It does not add features absent from the official software and does not provide a localized user interface.
+
+### Known limitations
+
+- other Windows versions and hardware revisions are not confirmed;
+- the official SVEN configurator must be installed separately;
+- no original or modified SVEN binaries are distributed;
+- localization work is reserved for version 2.x.
