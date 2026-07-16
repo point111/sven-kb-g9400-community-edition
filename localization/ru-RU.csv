@@ -1,0 +1,44 @@
+key,english,russian
+app.subtitle,Gaming Keyboard,Игровая клавиатура
+tab.profile,Profile,Профиль
+tab.customize,Customize,Настройка
+tab.lighting,Lighting,Подсветка
+tab.gaming_mode,Gaming Mode,Игровой режим
+tab.macro,Macro,Макросы
+profile.create,Create Profile,Создать профиль
+profile.delete,Delete Profile,Удалить профиль
+profile.save,Save Profile,Сохранить профиль
+profile.load,Load Profile,Загрузить профиль
+key_assignment.title,Key Assignment,Назначение клавиш
+key_assignment.keyboard,Keyboard,Клавиатура
+common.default,Default,По умолчанию
+common.disable,Disable,Отключить
+common.ok,OK,OK
+common.cancel,Cancel,Отмена
+common.apply,Apply,Применить
+common.save,Save,Сохранить
+common.load,Load,Загрузить
+common.restore,Restore,Восстановить
+common.yes,Yes,Да
+common.no,No,Нет
+lighting.effect,Light Effect,Эффект подсветки
+lighting.static,Static,Статический
+lighting.breathing,Breathing,Дыхание
+lighting.neon,Neon,Неон
+lighting.ripple,Ripple,Волна
+lighting.reactive,Reactive,Реактивный
+lighting.speed,Speed,Скорость
+lighting.brightness,Brightness,Яркость
+lighting.direction,Direction,Направление
+lighting.color,Color,Цвет
+gaming.disable_windows_key,Disable Windows Key,Отключить клавишу Win
+gaming.disable_alt_tab,Disable Alt + Tab,Отключить Alt + Tab
+macro.list,Macro List,Список макросов
+macro.new,New Macro,Новый макрос
+macro.delete,Delete,Удалить
+macro.modify,Modify,Изменить
+macro.record_title,Record Macro,Запись макроса
+macro.start_record,Start record,Начать запись
+macro.automatic_delay,Automatic recording time delay,Автоматическая задержка
+message.warning,Warning,Предупреждение
+message.save_changes,Do you want to save the changes?,Сохранить изменения?
