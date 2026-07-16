@@ -3,7 +3,14 @@ $ErrorActionPreference = 'Stop'
 
 $repoRoot = Split-Path $PSScriptRoot -Parent
 $installer = Join-Path $repoRoot 'scripts\Install-CommunityPatch.ps1'
-$appDir = Join-Path ${env:ProgramFiles(x86)} 'KB-G9400 Gaming Keyboard'
+$programFilesX86 = ${env:ProgramFiles(x86)}
+if ([string]::IsNullOrWhiteSpace($programFilesX86)) {
+    $programFilesX86 = $env:ProgramFiles
+}
+if ([string]::IsNullOrWhiteSpace($programFilesX86)) {
+    throw 'Не удалось определить каталог Program Files (x86).'
+}
+$appDir = Join-Path $programFilesX86 'KB-G9400 Gaming Keyboard'
 $exePath = Join-Path $appDir 'KB-G9400 Gaming Keyboard.exe'
 $backupDir = Join-Path $appDir '.community-patch-backup'
 $statePath = Join-Path $backupDir 'state.json'
