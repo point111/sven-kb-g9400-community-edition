@@ -44,8 +44,8 @@ Source: "..\README.ru.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 
 [Icons]
-Name: "{autoprograms}\SVEN KB-G9400 Community Patch\Verify installation"; Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\build\test.ps1"""; WorkingDir: "{app}"; IconFilename: "powershell.exe"
-Name: "{autoprograms}\SVEN KB-G9400 Community Patch\Restore original software"; Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\build\restore.ps1"""; WorkingDir: "{app}"; IconFilename: "powershell.exe"
+Name: "{autoprograms}\SVEN KB-G9400 Community Patch\Verify installation"; Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\build\test.ps1"""; WorkingDir: "{app}"; IconFilename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"
+Name: "{autoprograms}\SVEN KB-G9400 Community Patch\Restore original software"; Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\build\restore.ps1"""; WorkingDir: "{app}"; IconFilename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"
 
 [Code]
 const
@@ -57,9 +57,12 @@ begin
 end;
 
 function RunPowerShellScript(const ScriptPath: String; var ResultCode: Integer): Boolean;
+var
+  PowerShellExe: String;
 begin
+  PowerShellExe := ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe');
   Result := Exec(
-    'powershell.exe',
+    PowerShellExe,
     '-NoProfile -ExecutionPolicy Bypass -File "' + ScriptPath + '"',
     ExpandConstant('{app}'),
     SW_HIDE,
@@ -93,6 +96,7 @@ begin
     begin
       MsgBox(
         'The compatibility patch could not be installed.' + #13#10 +
+        'PowerShell exit code: ' + IntToStr(ResultCode) + #13#10 +
         'No unknown EXE version was modified. Review the setup and patch logs for details.',
         mbError,
         MB_OK
