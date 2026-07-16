@@ -1,66 +1,101 @@
 # SVEN KB-G9400 Community Patch
 
-Неофициальный патч совместимости и проект русификации конфигуратора клавиатуры SVEN KB-G9400.
+[Русская версия](README.ru.md)
 
-## Что уже работает
+An unofficial Windows 11 compatibility patch for the official SVEN KB-G9400 keyboard configurator.
 
-- обход ошибочной проверки `Product and driver are inconsistent`;
-- сохранение штатного HID-протокола и функций конфигуратора;
-- автоматическая резервная копия оригинального EXE;
-- проверка резервной копии и восстановления по SHA-256;
-- атомарная запись исправленного EXE;
-- диагностический журнал и файл состояния;
-- полный откат к оригинальному EXE.
+## Version 1.x scope
 
-## Локализация
+Version 1.x has one purpose: restore the original vendor software on Windows 11. It does not add new keyboard features and does not localize the English user interface.
 
-Проверенный русский словарь хранится в [`localization/ru-RU.csv`](localization/ru-RU.csv). Готовый языковой payload пока не публикуется: сначала требуется воспроизводимый способ сборки ресурсов без распространения оригинальных файлов SVEN.
+The patch bypasses the incorrect `Product and driver are inconsistent` rejection while preserving the original HID protocol and configurator behavior.
 
-## В разработке
+## Verified configuration
 
-- применение русской текстовой локализации к ресурсам конфигуратора;
-- русификация растровых элементов из каталога `skins`;
-- переключение RU/EN с безопасным резервным копированием ресурсов;
-- установщик и деинсталлятор;
-- проверка нескольких аппаратных ревизий.
+- Windows 11 25H2;
+- keyboard hardware ID `VID_30FA&PID_2350`;
+- configurator launch without the compatibility error;
+- lighting color changes;
+- key reassignment;
+- INI profile saving;
+- safe repeated installation;
+- complete restoration of the original EXE;
+- automated integrity checks in both patched and restored states.
 
-## Требования
+Other Windows versions and hardware revisions are not yet confirmed.
 
-Сначала установите официальный конфигуратор SVEN KB-G9400. Репозиторий не содержит оригинальный EXE, MSI или оригинальные ресурсы SVEN.
+## Requirements
 
-## Статус
+Install the official SVEN KB-G9400 configurator first. The expected default directory is:
 
-**Alpha.** Исходный compatibility fix проверен на Windows 11 25H2 и устройстве `VID_30FA&PID_2350`. Усиленный патчер из текущей ветки разработки требует повторного тестирования на реальной системе перед выпуском. RU-payload ещё не собран.
+```text
+C:\Program Files (x86)\KB-G9400 Gaming Keyboard
+```
 
-## Быстрый запуск
+This repository does not contain the original SVEN EXE, MSI package, archives, or proprietary resources.
 
-Запустите PowerShell от имени администратора:
+## Install
+
+Open PowerShell as Administrator in the repository directory:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
-.\scripts\Install-CommunityPatch.ps1
+.\build\install.ps1
+.\build\test.ps1
 ```
 
-Восстановление:
+A successful check ends with:
+
+```text
+RESULT: PASS
+```
+
+## Restore the original software
 
 ```powershell
-.\scripts\Restore-Original.ps1
+.\build\restore.ps1
+.\build\test.ps1
 ```
 
-Подробности:
+The restore operation verifies the original file by SHA-256.
 
-- [`docs/USER_GUIDE_RU.md`](docs/USER_GUIDE_RU.md) — установка, откат и диагностика;
-- [`docs/TESTING.md`](docs/TESTING.md) — проверка релиза;
-- [`docs/TECHNICAL.md`](docs/TECHNICAL.md) — техническая причина ошибки;
-- [`docs/CHAT_HISTORY.md`](docs/CHAT_HISTORY.md) — принятые проектные решения.
+## Safety model
 
-## Авторы и вклад
+The patcher:
 
-- Инициатор проекта, постановка задачи и тестирование на реальном оборудовании: **point111**.
-- Анализ, разработка патча, локализация и документация: **ChatGPT (OpenAI)** под руководством и с проверкой point111.
+- checks the expected original byte before modification;
+- creates and verifies a backup;
+- writes through a temporary file;
+- verifies the patched result;
+- records SHA-256 values in `state.json`;
+- writes a diagnostic log;
+- refuses unknown EXE versions instead of patching them blindly.
 
-ChatGPT использовался как инструмент разработки и не является владельцем или официальным издателем проекта.
+## Documentation
 
-## Правовой статус
+- [`docs/USER_GUIDE_RU.md`](docs/USER_GUIDE_RU.md) — Russian user guide;
+- [`docs/TESTING.md`](docs/TESTING.md) — release test checklist;
+- [`docs/TECHNICAL.md`](docs/TECHNICAL.md) — technical explanation;
+- [`docs/CHAT_HISTORY.md`](docs/CHAT_HISTORY.md) — accepted project decisions.
 
-Это независимый community-проект, не связанный и не одобренный SVEN. Названия и товарные знаки принадлежат их владельцам. Проект распространяет только собственные скрипты, метаданные и патчи и требует отдельно установленного официального ПО.
+## Version 2.x direction
+
+Features that are not present in the vendor software are reserved for version 2.x.
+
+Localization cannot be implemented as a conventional plug-in because the original configurator has no language-extension interface. Version 2.x may therefore use one of two controlled approaches:
+
+1. reproducible resource patching of a verified original EXE; or
+2. a separate loader/component that checks the installed environment and activates only compatible extensions.
+
+The project will not distribute modified SVEN binaries. It will distribute only its own patching tools, metadata, checks, and independently created resources.
+
+## Credits
+
+- Project initiation, requirements, and real-device testing: **point111**.
+- Analysis, implementation, localization research, and documentation: **ChatGPT (OpenAI)** under point111's direction and verification.
+
+ChatGPT was used as a development tool and is not the owner or official publisher of this project.
+
+## Legal status
+
+This is an independent community project and is not affiliated with or endorsed by SVEN. Product names and trademarks belong to their respective owners.
