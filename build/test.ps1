@@ -31,33 +31,41 @@ $backupExists = Test-RequiredPath -Path $backupExe -Label 'Резервная к
 $stateExists = Test-RequiredPath -Path $statePath -Label 'state.json найден'
 $logExists = Test-RequiredPath -Path $logPath -Label 'Журнал найден'
 
+$currentState = $null
+$actualExeHash = $null
+
 if ($exeExists) {
     $bytes = [IO.File]::ReadAllBytes($exe)
+    $actualExeHash = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash
     if ($bytes.Length -le $patchOffset) {
         Write-Host '[FAIL] EXE слишком мал для проверки точки патча'
         $failures.Add('Точка патча отсутствует в текущем EXE.')
     } else {
         $current = $bytes[$patchOffset]
         if ($current -eq $patchedByte) {
+            $currentState = 'patched'
             Write-Host '[PASS] Патч установлен'
         } elseif ($current -eq $originalByte) {
+            $currentState = 'original'
             Write-Host '[INFO] Сейчас установлен оригинальный EXE'
         } else {
             Write-Host ('[FAIL] Неизвестный байт в точке патча: 0x{0:X2}' -f $current)
             $failures.Add('Текущий EXE не соответствует известному оригинальному или исправленному состоянию.')
         }
+        Write-Host "[INFO] SHA-256 фактического текущего EXE: $actualExeHash"
     }
 }
 
+$state = $null
 if ($stateExists) {
     try {
         $state = Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json
         Write-Host '[PASS] state.json читается'
         if ($state.originalSha256) {
-            Write-Host "[INFO] SHA-256 оригинала: $($state.originalSha256)"
+            Write-Host "[INFO] SHA-256 оригинала из state.json: $($state.originalSha256)"
         }
         if ($state.currentSha256) {
-            Write-Host "[INFO] SHA-256 текущего EXE: $($state.currentSha256)"
+            Write-Host "[INFO] SHA-256 исправленного EXE из state.json: $($state.currentSha256)"
         }
     } catch {
         Write-Host '[FAIL] state.json повреждён или имеет неизвестный формат'
@@ -65,20 +73,24 @@ if ($stateExists) {
     }
 }
 
-if ($backupExists -and $stateExists) {
-    try {
-        $state = Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json
-        if ($state.originalSha256) {
-            $actualBackupHash = (Get-FileHash -LiteralPath $backupExe -Algorithm SHA256).Hash
-            if ($actualBackupHash -eq $state.originalSha256) {
-                Write-Host '[PASS] SHA-256 резервной копии совпадает с state.json'
-            } else {
-                Write-Host '[FAIL] SHA-256 резервной копии не совпадает с state.json'
-                $failures.Add('Контрольная сумма резервной копии не совпадает.')
-            }
-        }
-    } catch {
-        $failures.Add($_.Exception.Message)
+if ($backupExists -and $state) {
+    $actualBackupHash = (Get-FileHash -LiteralPath $backupExe -Algorithm SHA256).Hash
+    if ($state.originalSha256 -and $actualBackupHash -eq $state.originalSha256) {
+        Write-Host '[PASS] SHA-256 резервной копии совпадает с state.json'
+    } else {
+        Write-Host '[FAIL] SHA-256 резервной копии не совпадает с state.json'
+        $failures.Add('Контрольная сумма резервной копии не совпадает.')
+    }
+}
+
+if ($exeExists -and $state -and $actualExeHash) {
+    if ($currentState -eq 'original' -and $state.originalSha256 -and $actualExeHash -eq $state.originalSha256) {
+        Write-Host '[PASS] Текущий EXE совпадает с сохранённым оригиналом'
+    } elseif ($currentState -eq 'patched' -and $state.currentSha256 -and $actualExeHash -eq $state.currentSha256) {
+        Write-Host '[PASS] Текущий EXE совпадает с сохранённым исправленным файлом'
+    } else {
+        Write-Host '[FAIL] SHA-256 текущего EXE не соответствует определённому состоянию'
+        $failures.Add('Текущий EXE не совпадает с контрольной суммой известного состояния.')
     }
 }
 
