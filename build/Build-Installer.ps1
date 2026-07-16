@@ -5,10 +5,16 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $issPath = Join-Path $repoRoot 'installer\setup.iss'
 $distDir = Join-Path $repoRoot 'dist'
 
+$searchRoots = @(
+    ${env:ProgramFiles(x86)},
+    $env:ProgramFiles
+) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+
 $compilerCandidates = @(
-    (Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'),
-    (Join-Path $env:ProgramFiles 'Inno Setup 6\ISCC.exe')
-) | Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Leaf) }
+    $searchRoots |
+        ForEach-Object { Join-Path $_ 'Inno Setup 6\ISCC.exe' } |
+        Where-Object { Test-Path -LiteralPath $_ -PathType Leaf }
+)
 
 if ($compilerCandidates.Count -eq 0) {
     throw 'Inno Setup 6 compiler was not found. Install Inno Setup 6, then run this script again.'
