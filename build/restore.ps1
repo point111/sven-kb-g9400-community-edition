@@ -17,8 +17,8 @@ try {
     }
 
     & $restoreScript
-    if ($LASTEXITCODE -ne 0) {
-        throw "Скрипт восстановления завершился с кодом $LASTEXITCODE."
+    if (-not $?) {
+        throw 'Скрипт восстановления завершился с ошибкой.'
     }
 
     Write-Host ''
