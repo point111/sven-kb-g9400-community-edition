@@ -23,10 +23,39 @@ if ($compilerCandidates.Count -eq 0) {
 $iscc = $compilerCandidates[0]
 New-Item -ItemType Directory -Path $distDir -Force | Out-Null
 
-Write-Host "Building installer with: $iscc"
-& $iscc $issPath
-if ($LASTEXITCODE -ne 0) {
-    throw "Inno Setup compilation failed with exit code $LASTEXITCODE."
+$packagedPowerShellFiles = @(
+    'build\install.ps1',
+    'build\restore.ps1',
+    'build\test.ps1',
+    'scripts\Common.ps1',
+    'scripts\Install-CommunityPatch.ps1',
+    'scripts\Restore-Original.ps1'
+) | ForEach-Object { Join-Path $repoRoot $_ }
+
+$originalBytes = @{}
+$utf8Bom = [Text.UTF8Encoding]::new($true)
+
+try {
+    foreach ($path in $packagedPowerShellFiles) {
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+            throw "Required PowerShell file was not found: $path"
+        }
+
+        $originalBytes[$path] = [IO.File]::ReadAllBytes($path)
+        $text = [IO.File]::ReadAllText($path, [Text.Encoding]::UTF8)
+        [IO.File]::WriteAllText($path, $text, $utf8Bom)
+    }
+
+    Write-Host "Building installer with: $iscc"
+    & $iscc $issPath
+    if ($LASTEXITCODE -ne 0) {
+        throw "Inno Setup compilation failed with exit code $LASTEXITCODE."
+    }
+}
+finally {
+    foreach ($path in $originalBytes.Keys) {
+        [IO.File]::WriteAllBytes($path, $originalBytes[$path])
+    }
 }
 
 $setup = Join-Path $distDir 'SVEN-KB-G9400-Community-Patch-1.0.0-Setup.exe'
