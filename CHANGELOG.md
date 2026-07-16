@@ -6,6 +6,13 @@ The project follows Semantic Versioning.
 
 ## [Unreleased]
 
+### Added
+
+- unsigned Inno Setup graphical installer for users who do not use PowerShell;
+- Windows Installed apps uninstaller that restores the original EXE before removing patch tools;
+- reproducible installer build script and SHA-256 output;
+- graphical installer build and test documentation.
+
 ### Planned
 
 - version 2.x extensions beyond the capabilities of the vendor software;

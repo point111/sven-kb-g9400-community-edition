@@ -32,9 +32,27 @@ Install the official SVEN KB-G9400 configurator first. The expected default dire
 C:\Program Files (x86)\KB-G9400 Gaming Keyboard
 ```
 
-This repository does not contain the original SVEN EXE, MSI package, archives, or proprietary resources.
+This repository and its installer do not contain the original SVEN EXE, MSI package, archives, or proprietary resources.
 
-## Install
+## Install for end users
+
+Download and run:
+
+```text
+SVEN-KB-G9400-Community-Patch-1.0.0-Setup.exe
+```
+
+Approve the Windows UAC prompt and complete the setup wizard. The installer checks the official configurator, applies the compatibility patch, and verifies the result automatically.
+
+The first release is unsigned, so Windows SmartScreen may show an unknown-publisher warning. Verify the installer against the SHA-256 published with the GitHub Release.
+
+## Uninstall
+
+Open **Windows Settings → Apps → Installed apps**, find **SVEN KB-G9400 Community Patch**, and choose **Uninstall**.
+
+The uninstaller restores and verifies the original SVEN EXE before removing the Community Patch tools.
+
+## Manual developer workflow
 
 Open PowerShell as Administrator in the repository directory:
 
@@ -50,14 +68,22 @@ A successful check ends with:
 RESULT: PASS
 ```
 
-## Restore the original software
+Restore manually with:
 
 ```powershell
 .\build\restore.ps1
 .\build\test.ps1
 ```
 
-The restore operation verifies the original file by SHA-256.
+## Build the installer
+
+Install Inno Setup 6, then run:
+
+```powershell
+.\build\Build-Installer.ps1
+```
+
+The generated installer and `SHA256SUMS.txt` are written to `dist/`. See [`docs/INSTALLER.md`](docs/INSTALLER.md).
 
 ## Safety model
 
@@ -73,6 +99,7 @@ The patcher:
 
 ## Documentation
 
+- [`docs/INSTALLER.md`](docs/INSTALLER.md) — graphical installer build and test guide;
 - [`docs/USER_GUIDE_RU.md`](docs/USER_GUIDE_RU.md) — Russian user guide;
 - [`docs/TESTING.md`](docs/TESTING.md) — release test checklist;
 - [`docs/TECHNICAL.md`](docs/TECHNICAL.md) — technical explanation;
