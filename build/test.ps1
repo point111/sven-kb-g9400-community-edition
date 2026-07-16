@@ -5,6 +5,12 @@ Write-Host 'SVEN KB-G9400 Community Edition — проверка установ�
 
 $failures = [System.Collections.Generic.List[string]]::new()
 $programFilesX86 = ${env:ProgramFiles(x86)}
+if ([string]::IsNullOrWhiteSpace($programFilesX86)) {
+    $programFilesX86 = $env:ProgramFiles
+}
+if ([string]::IsNullOrWhiteSpace($programFilesX86)) {
+    throw 'Не удалось определить каталог Program Files (x86).'
+}
 $appDir = Join-Path $programFilesX86 'KB-G9400 Gaming Keyboard'
 $exe = Join-Path $appDir 'KB-G9400 Gaming Keyboard.exe'
 $backupDir = Join-Path $appDir '.community-patch-backup'
