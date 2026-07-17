@@ -59,11 +59,18 @@ end;
 function RunPowerShellScript(const ScriptPath: String; var ResultCode: Integer): Boolean;
 var
   PowerShellExe: String;
+  LogPath: String;
+  CommandLine: String;
 begin
   PowerShellExe := ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe');
+  LogPath := ExpandConstant('{app}\installer-powershell.log');
+  CommandLine :=
+    '-NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "& ''' +
+    ScriptPath + ''' *>> ''' + LogPath + '''"';
+
   Result := Exec(
     PowerShellExe,
-    '-NoProfile -ExecutionPolicy Bypass -File "' + ScriptPath + '"',
+    CommandLine,
     ExpandConstant('{app}'),
     SW_HIDE,
     ewWaitUntilTerminated,
@@ -87,9 +94,16 @@ end;
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   ResultCode: Integer;
+  LogPath: String;
 begin
   if CurStep = ssPostInstall then
   begin
+    LogPath := ExpandConstant('{app}\installer-powershell.log');
+    DeleteFile(LogPath);
+
+    { Allow Windows security scanning to release freshly extracted scripts. }
+    Sleep(1000);
+
     WizardForm.StatusLabel.Caption := 'Applying the Windows 11 compatibility patch...';
     if not RunPowerShellScript(ExpandConstant('{app}\build\install.ps1'), ResultCode) or
        (ResultCode <> 0) then
@@ -97,7 +111,7 @@ begin
       MsgBox(
         'The compatibility patch could not be installed.' + #13#10 +
         'PowerShell exit code: ' + IntToStr(ResultCode) + #13#10 +
-        'No unknown EXE version was modified. Review the setup and patch logs for details.',
+        'Diagnostic log:' + #13#10 + LogPath,
         mbError,
         MB_OK
       );
@@ -111,7 +125,7 @@ begin
       RunPowerShellScript(ExpandConstant('{app}\build\restore.ps1'), ResultCode);
       MsgBox(
         'Verification failed. The installer attempted to restore the original configurator.' + #13#10 +
-        'Review the setup and patch logs before trying again.',
+        'Diagnostic log:' + #13#10 + LogPath,
         mbError,
         MB_OK
       );
@@ -131,7 +145,8 @@ begin
     begin
       MsgBox(
         'The original configurator could not be restored automatically.' + #13#10 +
-        'Uninstallation has been stopped so the recovery tools remain available.',
+        'Uninstallation has been stopped so the recovery tools remain available.' + #13#10 +
+        'Diagnostic log:' + #13#10 + ExpandConstant('{app}\installer-powershell.log'),
         mbError,
         MB_OK
       );
